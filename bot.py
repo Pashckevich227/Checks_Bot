@@ -11,6 +11,7 @@ count_galochka_Dima = 0
 count_galochka_Ilia = 0
 count_galochka_Sania = 0
 count_galochka_Andrey = 0
+users = ['Pasha', 'Lesha', 'Dan', 'Artem', 'Dima', 'Ilia', 'Sania', 'Andey']
 
 # Pasha_id = 0
 # Lesha_id = 2
@@ -130,15 +131,18 @@ def start(message):
 def help(message):
     bot.send_message(message.chat.id, f'По всем вопросам к кабану')
 
-@bot.message_handler(commands=['Галочку_Pasha'])
-def add(message):
-    global count_galochka_Pasha
-    count_galochka_Pasha += 1
-    bot.send_message(message.chat.id, f"Присвоил {message.from_user.first_name} галочку")
-
 @bot.message_handler(commands=['stats'])
 def stats(message):
     bot.send_message(message.chat.id, f'{message.from_user.first_name} {count_galochka_Pasha}')
+
+@bot.message_handler(content_types='text')
+def add(message):
+    global users, count_galochka_Pasha
+    if message in users:
+        count_galochka_Pasha += 1
+        bot.send_message(message.chat.id, f"Присвоил {message.from_user.first_name} галочку")
+
+
 
 #@bot.message_handler(commands=['info'])
 #def get_user_info(message):
