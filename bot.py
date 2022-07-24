@@ -4,23 +4,9 @@ import sqlite3
 bot = telebot.TeleBot("5436229582:AAHBayc_KAdkIFyHNuF4rDNgVaX7uXw_9H8", parse_mode=None)
 
 count_galochka_Pasha = 0
-count_galochka_Lesha = 0
-count_galochka_Dan = 0
-count_galochka_Artem = 0
-count_galochka_Dima = 0
-count_galochka_Ilia = 0
-count_galochka_Sania = 0
-count_galochka_Andrey = 0
-users = ['Pasha', 'Lesha', 'Dan', 'Artem', 'Dima', 'Ilia', 'Sania', 'Andey']
+users = ['/Pasha', '/Lesha', '/Dan', '/Artem', '/Dima', '/Ilia', '/Sania', '/Andey']
+# user_id:   0         2        3        4         5       6         7         8;
 
-# Pasha_id = 0
-# Lesha_id = 2
-# Dan_id = 3
-# Artem_id = 4
-# Dima_id = 5
-# Ilia_id = 6
-# Sania_id = 7
-# Andrey_id = 8
 
 # База данных
 with sqlite3.connect("orders.db") as db:
@@ -91,6 +77,7 @@ def print_db():
         db.close()
         print("Соединение с SQLite закрыто")
 
+
 def check_user_in_db(user_id):
     global sql, db
     try:
@@ -135,18 +122,17 @@ def help(message):
 def stats(message):
     bot.send_message(message.chat.id, f'{message.from_user.first_name} {count_galochka_Pasha}')
 
-@bot.message_handler(content_types='text')
+
+@bot.message_handler(content_types=["text"])
 def add(message):
     global users, count_galochka_Pasha
-    if message in users:
+    print(message.text)
+    if message.text in users:
         count_galochka_Pasha += 1
         bot.send_message(message.chat.id, f"Присвоил {message.from_user.first_name} галочку")
+    else:
+        print('Error')
 
-
-
-#@bot.message_handler(commands=['info'])
-#def get_user_info(message):
-#    bot.send_message(message.chat.id, message)
 
 bot.polling(none_stop=True)
 
