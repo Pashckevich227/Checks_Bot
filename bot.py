@@ -5,7 +5,7 @@ bot = telebot.TeleBot("5436229582:AAHBayc_KAdkIFyHNuF4rDNgVaX7uXw_9H8", parse_mo
 
 count_galochka_Pasha = 0
 users = ['/Pasha', '/Lesha', '/Dan', '/Artem', '/Dima', '/Ilia', '/Sania', '/Andey']
-# user_id:   0         2        3        4         5       6         7         8;
+# user_id:   0         1        2        3         4       5         6         7;
 
 
 # База данных
@@ -58,15 +58,34 @@ def delete_sqlite_record(user_id):
         print("Соединение с SQLite закрыто")
 
 
-def print_db():
+def print_all_db():
     global sql, db
     try:
         db = sqlite3.connect('orders.db')
         sql = db.cursor()
         print("Подключен к SQLite")
 
-        for _ in sql.execute("SELECT * FROM users;"):
-            print(sql.fetchall())
+        for i in sql.execute("SELECT * FROM users;"):
+            print(*i, sep=' ')
+
+        sql.close()
+
+    except sqlite3.Error as error:
+        print("Ошибка при работе с SQLite", error)
+    finally:
+        sql.close()
+        db.close()
+        print("Соединение с SQLite закрыто")
+
+def print_checks_db():
+    global sql, db
+    try:
+        db = sqlite3.connect('orders.db')
+        sql = db.cursor()
+        print("Подключен к SQLite")
+
+        for i in sql.execute("SELECT count_checks FROM users;"):
+            print(*i)
 
         sql.close()
 
@@ -100,12 +119,35 @@ def check_user_in_db(user_id):
         db.close()
         print("Соединение с SQLite закрыто")
 
+def update_sqlite_table(user_id, count_checks):
+    global sql, db
+    try:
+        db = sqlite3.connect('orders.db')
+        sql = db.cursor()
+        print("Подключен к SQLite")
 
-#delete_sqlite_record(i)
+        sql_update_query = """Update users set count_checks = ? where user_id = ?"""
+        data = (count_checks, user_id)
+        sql.execute(sql_update_query, data)
+        db.commit()
+        print("Запись успешно обновлена")
+
+        sql.close()
+
+    except sqlite3.Error as error:
+        print("Ошибка при работе с SQLite", error)
+    finally:
+        sql.close()
+        db.close()
+        print("Соединение с SQLite закрыто")
+
+#delete_sqlite_record(0)
 #insert_varible_into_table(8, 0)
 #check_user_in_db(1)
-#print_db()
-
+#print_all_db()
+#print_checks_db()
+#for i in range(8):
+#    update_sqlite_table(i, 0)
 
 # Функционал бота
 
