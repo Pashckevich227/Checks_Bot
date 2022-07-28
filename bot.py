@@ -123,19 +123,20 @@ def check_user_in_db(user_id):
         print("Соединение с SQLite закрыто")
 
 
-def update_sqlite_table(user_id, count_checks):
+def update_sqlite_table(id_in_db):
     global sql, db
     try:
         db = sqlite3.connect('orders.db')
         sql = db.cursor()
         print("Подключен к SQLite")
-
-        sql_update_query = """Update users set count_checks=count_checks+1 = ? where user_id = ?"""
-        sql.execute(str(sql_update_query), (str([count_checks]), str([user_id])))
+        total = sql.execute("SELECT count_checks FROM users WHERE user_id = ?", (id_in_db,))
+        upper_total = total.fetchone()[0] + 1
+        print(upper_total)
+        sql.execute(f"UPDATE users SET count_checks = {str(upper_total)} WHERE user_id = {id_in_db}")
         db.commit()
         print("Запись успешно обновлена")
+        return sql.close() and db.commit()
 
-        sql.close()
 
     except sqlite3.Error as error:
         print("Ошибка при работе с SQLite", error)
@@ -150,15 +151,13 @@ def update_sqlite_table(user_id, count_checks):
 # check_user_in_db(1)
 print_all_db()
 
-print_checks_db(0)
 
+# update_sqlite_table(0)
 
 # for i in range(8):
 #    update_sqlite_table(i, 0)
 
 # print(count_check_user)
-
-# Функционал бота
 
 
 @bot.message_handler(commands=['start'])
@@ -175,19 +174,16 @@ def helping(message):
 def stats(message):
     for i in range(8):
         bot.send_message(message.chat.id, str(users[i]) + f' {print_checks_db(str(i))}')
-        print(f' {print_checks_db(str(i))}')
 
 
 @bot.message_handler(content_types=["text"])
 def add(message):
     global users, count_check_user
-    print(message.text)
     if message.text in users:
         id_in_db = users.index(message.text)
-        print(id_in_db)
-        print_checks_db(id_in_db)
-        update_sqlite_table(id_in_db, count_check_user)
-        bot.send_message(message.chat.id, f"Присвоил {message.from_user.first_name} галочку")
+        # print_checks_db(id_in_db)
+        update_sqlite_table(id_in_db)
+        bot.send_message(message.chat.id, f"Присвоил {users[id_in_db]} галочку")
     else:
         print('Error')
 
