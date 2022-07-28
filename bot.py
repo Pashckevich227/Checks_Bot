@@ -5,10 +5,7 @@ bot = telebot.TeleBot("5436229582:AAHBayc_KAdkIFyHNuF4rDNgVaX7uXw_9H8", parse_mo
 
 count_check_user = 0
 users = ['/Pasha', '/Lesha', '/Dan', '/Artem', '/Dima', '/Ilia', '/Sania', '/Andey']
-# user_id:   0         1        2        3         4       5         6         7;
 
-
-# База данных
 with sqlite3.connect("orders.db") as db:
     sql = db.cursor()
 
@@ -166,18 +163,13 @@ def reset(id_in_db):
         print("Соединение с SQLite закрыто")
 
 
+# --- Управление Базой Данных ---#
 # delete_sqlite_record(0)
-# insert_variable_into_table(8, 0)
+# insert_variable_into_table(8, 0)  #Установить значение в БД
 # check_user_in_db(1)
-#reset(7)
-print_all_db()
-
+# reset(5)   #Обнулить галочки
+# print_all_db()     #Вывод всей базы данных в консоль
 # update_sqlite_table(0)
-
-# for i in range(8):
-#    update_sqlite_table(i, 0)
-
-# print(count_check_user)
 
 
 @bot.message_handler(commands=['start'])
@@ -192,8 +184,16 @@ def helping(message):
 
 @bot.message_handler(commands=['stats'])
 def stats(message):
-    for i in range(8):
-        bot.send_message(message.chat.id, str(users[i]) + f' {print_checks_db(str(i))}')
+    bot.send_message(message.chat.id, f'''Статистика: \n
+    {str(users[0][1:])} ---> {print_checks_db(str(0))} \n
+    {str(users[1][1:])} ---> {print_checks_db(str(1))} \n
+    {str(users[2][1:])} ---> {print_checks_db(str(2))} \n
+    {str(users[3][1:])} ---> {print_checks_db(str(3))} \n
+    {str(users[4][1:])} ---> {print_checks_db(str(4))} \n
+    {str(users[5][1:])} ---> {print_checks_db(str(5))} \n
+    {str(users[6][1:])} ---> {print_checks_db(str(6))} \n
+    {str(users[7][1:])} ---> {print_checks_db(str(7))} \n
+    ''')
 
 
 @bot.message_handler(content_types=["text"])
@@ -201,7 +201,6 @@ def add(message):
     global users, count_check_user
     if message.text in users:
         id_in_db = users.index(message.text)
-        # print_checks_db(id_in_db)
         update_sqlite_table(id_in_db)
         bot.send_message(message.chat.id, f"Присвоил {users[id_in_db]} галочку")
     else:
