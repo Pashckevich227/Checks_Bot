@@ -91,6 +91,7 @@ def print_checks_db(id_in_db):
         count_check_user = checks.fetchone()
         print(*count_check_user)
         sql.close()
+        return count_check_user[0]
 
     except sqlite3.Error as error:
         print("Ошибка при работе с SQLite", error)
@@ -107,13 +108,12 @@ def check_user_in_db(user_id):
         sql = db.cursor()
 
         info = sql.execute('SELECT * FROM users WHERE user_id=?', (user_id,))
+        print(*info.fetchall())
         if info.fetchone() is None:
             db.execute("INSERT INTO users(user_id) VALUES (?)", (user_id,))
             db.commit()
             print('Добавил!')
-        else:
-            print(*sql.fetchall())
-            print('None')
+
 
     except sqlite3.Error as error:
         print("Ошибка при работе с SQLite", error)
@@ -151,6 +151,8 @@ def update_sqlite_table(user_id, count_checks):
 print_all_db()
 
 print_checks_db(0)
+
+
 # for i in range(8):
 #    update_sqlite_table(i, 0)
 
@@ -172,7 +174,8 @@ def helping(message):
 @bot.message_handler(commands=['stats'])
 def stats(message):
     for i in range(8):
-        bot.send_message(message.chat.id, users[i] + f' {print_checks_db(i)}',)
+        bot.send_message(message.chat.id, str(users[i]) + f' {print_checks_db(str(i))}')
+        print(f' {print_checks_db(str(i))}')
 
 
 @bot.message_handler(content_types=["text"])
