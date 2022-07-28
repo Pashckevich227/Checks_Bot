@@ -3,7 +3,7 @@ import sqlite3
 
 bot = telebot.TeleBot("5436229582:AAHBayc_KAdkIFyHNuF4rDNgVaX7uXw_9H8", parse_mode=None)
 
-count_galochka_Pasha = 0
+count_check_user = 0
 users = ['/Pasha', '/Lesha', '/Dan', '/Artem', '/Dima', '/Ilia', '/Sania', '/Andey']
 # user_id:   0         1        2        3         4       5         6         7;
 
@@ -17,7 +17,8 @@ sql.execute("""CREATE TABLE IF NOT EXISTS users(
            count_checks INT);
         """)
 
-def insert_varible_into_table(user_id, count_checks):
+
+def insert_variable_into_table(user_id, count_checks):
     global sql, db
     try:
         db = sqlite3.connect('orders.db')
@@ -77,16 +78,18 @@ def print_all_db():
         db.close()
         print("Соединение с SQLite закрыто")
 
-def print_checks_db():
-    global sql, db
+
+def print_checks_db(id_in_db):
+    global sql, db, count_check_user
     try:
         db = sqlite3.connect('orders.db')
         sql = db.cursor()
         print("Подключен к SQLite")
 
-        for i in sql.execute("SELECT count_checks FROM users;"):
-            print(*i)
-
+        user_id = id_in_db
+        checks = sql.execute("SELECT count_checks FROM users WHERE user_id = ?", (user_id,))
+        count_check_user = checks.fetchone()
+        print(*count_check_user)
         sql.close()
 
     except sqlite3.Error as error:
@@ -103,9 +106,9 @@ def check_user_in_db(user_id):
         db = sqlite3.connect('orders.db')
         sql = db.cursor()
 
-        info = sql.execute('SELECT * FROM users WHERE user_id=?', (user_id, ))
+        info = sql.execute('SELECT * FROM users WHERE user_id=?', (user_id,))
         if info.fetchone() is None:
-            db.execute("INSERT INTO users(user_id) VALUES (?)", (user_id, ))
+            db.execute("INSERT INTO users(user_id) VALUES (?)", (user_id,))
             db.commit()
             print('Добавил!')
         else:
@@ -119,6 +122,7 @@ def check_user_in_db(user_id):
         db.close()
         print("Соединение с SQLite закрыто")
 
+
 def update_sqlite_table(user_id, count_checks):
     global sql, db
     try:
@@ -126,9 +130,8 @@ def update_sqlite_table(user_id, count_checks):
         sql = db.cursor()
         print("Подключен к SQLite")
 
-        sql_update_query = """Update users set count_checks = ? where user_id = ?"""
-        data = (count_checks, user_id)
-        sql.execute(sql_update_query, data)
+        sql_update_query = """Update users set count_checks=count_checks+1 = ? where user_id = ?"""
+        sql.execute(str(sql_update_query), (str([count_checks]), str([user_id])))
         db.commit()
         print("Запись успешно обновлена")
 
@@ -141,40 +144,49 @@ def update_sqlite_table(user_id, count_checks):
         db.close()
         print("Соединение с SQLite закрыто")
 
-#delete_sqlite_record(0)
-#insert_varible_into_table(8, 0)
-#check_user_in_db(1)
-#print_all_db()
-#print_checks_db()
-#for i in range(8):
+
+# delete_sqlite_record(0)
+# insert_variable_into_table(8, 0)
+# check_user_in_db(1)
+print_all_db()
+
+print_checks_db(0)
+# for i in range(8):
 #    update_sqlite_table(i, 0)
+
+# print(count_check_user)
 
 # Функционал бота
 
+
 @bot.message_handler(commands=['start'])
 def start(message):
-    print_name_person = f'{message.from_user.first_name}'
     bot.send_message(message.chat.id, f'Кому галочку начислить ?)')
 
+
 @bot.message_handler(commands=['help'])
-def help(message):
+def helping(message):
     bot.send_message(message.chat.id, f'По всем вопросам к кабану')
+
 
 @bot.message_handler(commands=['stats'])
 def stats(message):
-    bot.send_message(message.chat.id, f'{message.from_user.first_name} {count_galochka_Pasha}')
+    for i in range(8):
+        bot.send_message(message.chat.id, users[i] + f' {print_checks_db(i)}',)
 
 
 @bot.message_handler(content_types=["text"])
 def add(message):
-    global users, count_galochka_Pasha
+    global users, count_check_user
     print(message.text)
     if message.text in users:
-        count_galochka_Pasha += 1
+        id_in_db = users.index(message.text)
+        print(id_in_db)
+        print_checks_db(id_in_db)
+        update_sqlite_table(id_in_db, count_check_user)
         bot.send_message(message.chat.id, f"Присвоил {message.from_user.first_name} галочку")
     else:
         print('Error')
 
 
 bot.polling(none_stop=True)
-
