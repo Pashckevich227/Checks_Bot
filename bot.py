@@ -146,11 +146,31 @@ def update_sqlite_table(id_in_db):
         print("Соединение с SQLite закрыто")
 
 
+def reset(id_in_db):
+    global sql, db
+    try:
+        db = sqlite3.connect('orders.db')
+        sql = db.cursor()
+        print("Подключен к SQLite")
+        sql.execute(f"UPDATE users SET count_checks = 0 WHERE user_id = {id_in_db}")
+        db.commit()
+        print("Запись успешно обновлена")
+        return sql.close() and db.commit()
+
+
+    except sqlite3.Error as error:
+        print("Ошибка при работе с SQLite", error)
+    finally:
+        sql.close()
+        db.close()
+        print("Соединение с SQLite закрыто")
+
+
 # delete_sqlite_record(0)
 # insert_variable_into_table(8, 0)
 # check_user_in_db(1)
+#reset(7)
 print_all_db()
-
 
 # update_sqlite_table(0)
 
